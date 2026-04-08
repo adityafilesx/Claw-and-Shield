@@ -1,0 +1,185 @@
+version: "2.0"
+firm: "ArmorClaw Demo Firm"
+effective_date: "2026-04-07"
+
+intent_taxonomy:
+  - BUY_EQUITY
+  - SELL_EQUITY
+  - RESEARCH_TICKER
+  - HTTP_CALL
+  - DELEGATE_TASK
+  - SELL_SHORT
+  - BUY_OPTIONS
+  - UNKNOWN
+
+policies:
+
+  - id: POL_001
+    name: MAX_SINGLE_POSITION_SIZE
+    description: No single stock position can exceed 10% of total portfolio value
+    trigger: [BUY_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_pct: 10.0
+
+  - id: POL_002
+    name: MAX_SECTOR_CONCENTRATION
+    description: No single sector can exceed 30% of portfolio
+    trigger: [BUY_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_pct: 30.0
+
+  - id: POL_003
+    name: MAX_SINGLE_TRADE_VALUE
+    description: No single trade can exceed $5000 USD
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_usd: 5000
+
+  - id: POL_004
+    name: TICKER_WHITELIST_ENFORCEMENT
+    description: Only whitelisted tickers may be traded
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: HIGH
+    action: BLOCK
+
+  - id: POL_005
+    name: NEGATIVE_QUANTITY_GUARD
+    description: Quantity must be a positive integer
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: CRITICAL
+    action: BLOCK
+
+  - id: POL_006
+    name: NO_PRE_MARKET_EXECUTION
+    description: No trades outside 9:30 AM to 4:00 PM EST
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: MEDIUM
+    action: BLOCK
+
+  - id: POL_007
+    name: MAX_DAILY_TRADE_COUNT
+    description: Maximum 20 trades per calendar day
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_count: 20
+
+  - id: POL_008
+    name: MAX_TRADES_PER_HOUR
+    description: Maximum 10 trades per rolling 60-minute window
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_count: 10
+
+  - id: POL_009
+    name: DAILY_LOSS_CIRCUIT_BREAKER
+    description: Halt all trades if portfolio down more than 5% today
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: CRITICAL
+    action: BLOCK
+    threshold_pct: -5.0
+
+  - id: POL_010
+    name: SINGLE_POSITION_LOSS_LIMIT
+    description: Block new buys if any held position is down more than 15%
+    trigger: [BUY_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_pct: -15.0
+
+  - id: POL_011
+    name: NO_PENNY_STOCKS
+    description: No stocks priced below $1.00 per share
+    trigger: [BUY_EQUITY]
+    severity: MEDIUM
+    action: BLOCK
+    threshold_usd: 1.00
+
+  - id: POL_012
+    name: MAX_QUANTITY_PER_ORDER
+    description: No single order for more than 500 shares
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_count: 500
+
+  - id: POL_013
+    name: NO_EXTERNAL_DATA_EXPORT
+    description: Block HTTP calls to non-whitelisted domains
+    trigger: [HTTP_CALL]
+    severity: CRITICAL
+    action: BLOCK_AND_ALERT
+
+  - id: POL_014
+    name: READ_ONLY_RESEARCH_MODE
+    description: Agents in RESEARCH mode cannot execute any trades
+    trigger: [BUY_EQUITY, SELL_EQUITY]
+    severity: HIGH
+    action: BLOCK
+
+  - id: POL_015
+    name: SHORT_SELLING_PROHIBITED
+    description: Short selling is not permitted
+    trigger: [SELL_SHORT]
+    severity: HIGH
+    action: BLOCK
+
+  - id: POL_016
+    name: OPTIONS_TRADING_PROHIBITED
+    description: Options trading is not authorized
+    trigger: [BUY_OPTIONS]
+    severity: HIGH
+    action: BLOCK
+
+  - id: POL_017
+    name: CASH_RESERVE_MINIMUM
+    description: Portfolio must maintain at least 10% cash at all times
+    trigger: [BUY_EQUITY]
+    severity: HIGH
+    action: BLOCK
+    threshold_pct: 10.0
+
+  - id: POL_018
+    name: SUB_AGENT_SCOPE_ENFORCEMENT
+    description: Sub-agents can only use tools in their capability token
+    trigger: [DELEGATE_TASK]
+    severity: CRITICAL
+    action: BLOCK
+
+  - id: POL_019
+    name: OVERSELL_GUARD
+    description: Cannot sell more shares than currently held
+    trigger: [SELL_EQUITY]
+    severity: CRITICAL
+    action: BLOCK
+
+  - id: POL_020
+    name: UNKNOWN_INTENT_BLOCK
+    description: Any unclassifiable action is blocked by default
+    trigger: [UNKNOWN]
+    severity: CRITICAL
+    action: BLOCK
+
+whitelist:
+  urls:
+    - "https://paper-api.alpaca.markets"
+    - "https://api.firecrawl.dev"
+    - "https://generativelanguage.googleapis.com"
+    - "https://data.alpaca.markets"
+  tickers:
+    - AAPL
+    - MSFT
+    - NVDA
+    - GOOGL
+    - AMZN
+    - TSLA
+    - META
+    - JPM
+    - BAC
+    - SPY
+    - QQQ
+    - GOOG
